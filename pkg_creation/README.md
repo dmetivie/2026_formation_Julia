@@ -96,55 +96,27 @@ case, a round trip (`rebuild(model, parameters(model))`).
 **Package 2 (ODE):** The one-step update is one line. Test your Euler step on `u' = -u, u(0)=1` → `u(t) = exp(-t)`. Then check RK4 reaches higher order.
 
 **Package 3 (NN):** Start with **just** one `Dense` layer. Write `(layer::Dense)(x) = layer.σ.(layer.W * x .+ layer.b)` and test it by hand. Then write `nparams`. Then `parameters` and `rebuild` — these are mechanical flattening/unflattening. Only then add `Chain`.
-
-**Package 4 (Optim):** Implement gradient descent and [Gauss–Newton](https://en.wikipedia.org/wiki/Gauss%E2%80%93Newton_algorithm#Julia) first (normal equations `(J'*J) \ (J'*r)`). Levenberg–Marquardt (add `λ*I`) is a one-line fix for robustness. Test on a quadratic: `f(x) = x^2`, optimal at `x=0`.
-
-## Three templates, on purpose
-
-The four packages were generated with three different tools, so you can see
-what each gives you:
-
-| package | generator | what you get |
-| --- | --- | --- |
-| `FrejusJuliaAD0` | `PkgTemplates.jl` | `src`, `test`, `docs`, CI, Codecov, TagBot |
-| `FrejusJuliaODE0` | `BestieTemplate.jl` `:light` | the above + formatter, linters, PR template |
-| `FrejusJuliaNeuralNetworks0` | `BestieTemplate.jl` `:light` | same, with `TestItems.jl` tests |
-| `FrejusJuliaOptimization0` | `BestieTemplate.jl` `:tiny` | `src` and `test`, nothing else |
-
-See [the BestieTemplate FAQ](https://juliabesties.github.io/BestieTemplate.jl/stable/30-questions/)
-for what every generated file is for.
-
-Note the package *folders* are named `FrejusJuliaODE0.jl` (with `.jl`) but
-the *module* is `FrejusJuliaODE0` (without). That is the Julia convention:
-`.jl` belongs to the repository, not to the module.
-
-## Running things
-
 ```julia
-# in each package directory
-julia --project=.
-] test                                  # run the tests
-] instantiate                           # install the dependencies
+struct Dense{M, V, F}
+    W::M           # weights, shape (nout, nin)
+    b::V           # bias, shape (nout,)
+    σ::F           # activation function
+end
 
-# the final assembly
-cd neural_ode
-julia --project=.
-] instantiate
-include("train_neural_ode.jl")
+# Make a Dense layer callable
+(layer::Dense)(x) = layer.σ.(layer.W * x .+ layer.b)
+
+struct Chain{L <: Tuple}
+    layers::L
+end
+
+# Chain composition: apply each layer in sequence
+(NNet::Chain)(x) = foldl((y, f) -> f(y), NNet.layers; init = x)
 ```
+The rest is:
+1. Write `nparams(model)` — count parameters
+2. Write `parameters(model)` — stack all W's and b's into one vector
+3. Write `rebuild(model, θ)` — pull them back out and reconstruct the struct
 
-`neural_ode/Project.toml` uses `[sources]` with local paths, so nothing needs
-to be registered or pushed anywhere.
 
-## If you finish early
-
-- Add a `midpoint_step` or a symplectic Euler to package 2, and check the
-  convergence order from the tests.
-- Add `hessian` to package 1 by nesting duals, and use it in a true Newton
-  minimiser.
-- Make `rebuild` allocation-free with views.
-- Replace the single training trajectory by several initial conditions and
-  watch the extrapolation error in section 8 of the script drop.
-- Swap your own package for the real one — `ForwardDiff.jl`,
-  `OrdinaryDiffEq.jl`, `Lux.jl`, `NonlinearSolve.jl` — one at a time. If your
-  interfaces were right, the script should keep running.
+**Package 4 (Optim):** Implement gradient descent and [Gauss–Newton](https://en.wikipedia.org/wiki/Gauss%E2%80%93Newton_algorithm#Julia) first (normal equations `(J'*J) \ (J'*r)`). Note that Levenberg–Marquardt (add `λ*I`) is a one-line fix for robustness. Test on a quadratic: `f(x) = x^2`, optimal at `x=0`.
