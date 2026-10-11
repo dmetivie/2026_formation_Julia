@@ -1,14 +1,3 @@
-# =============================================================================
-# Figures for the neural ODE exercise.
-#
-#   julia --project=.
-#   ] add CairoMakie
-#   include("plot_neural_ode.jl")
-#
-# Kept out of `train_neural_ode.jl` so that the assembly itself depends on
-# nothing but the four packages and the standard library.
-# =============================================================================
-
 using CairoMakie
 
 u1(trajectory) = getindex.(trajectory, 1)
