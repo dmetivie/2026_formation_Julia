@@ -1,0 +1,8 @@
+[deps]
+FrejusJuliaOptimization0 = "ca26f490-bc68-4489-97cc-95a4c39097e5"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+
+[sources]
+FrejusJuliaOptimization0 = {path = ".."}

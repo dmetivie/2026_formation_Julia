@@ -1,0 +1,41 @@
+# Changes here will be overwritten by Copier
+AddAgentsMd: false
+AddAllcontributors: false
+AddChangelog: false
+AddCitationCFF: false
+AddCodeOfConduct: false
+AddContributionDocs: false
+AddCopierCI: false
+AddDocs: true
+AddDocsCI: true
+AddFormatterAndLinterConfigFiles: true
+AddGitHubPRTemplate: true
+AddGitHubTemplates: false
+AddLintCI: false
+AddLychee: false
+AddMacToCI: false
+AddPrecommit: false
+AddTagBotCI: true
+AddTestCI: true
+AddVSCodeRecommendations: false
+AddWinToCI: false
+Authors: David Métivier <david.metivier@inrae.fr>
+CheckExplicitImports: false
+ConfigIndentation: 2
+GitHubActionVersionAutoUpdate: dependabot
+JuliaCompatAutoUpdate: dependabot
+JuliaIndentation: 4
+JuliaMinCIVersion: '1.13'
+JuliaMinVersion: '1.13'
+License: MIT
+LicenseCopyrightHolders: David Métivier
+MarkdownIndentation: 2
+PackageName: FrejusJuliaODE0
+PackageOwner: dmetivie
+PackageUUID: bd46a455-3e9a-5dc5-990a-5a8525cf4051
+RunJuliaNightlyOnCI: false
+StrategyConfirmIncluded: true
+StrategyLevel: 1
+StrategyReviewExcluded: false
+TestingStrategy: basic
+_src_path: C:\Users\metivier\.julia\packages\BestieTemplate\MPEqY

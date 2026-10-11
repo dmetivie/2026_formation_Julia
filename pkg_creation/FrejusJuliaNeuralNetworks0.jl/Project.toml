@@ -1,0 +1,14 @@
+name = "FrejusJuliaNeuralNetworks0"
+uuid = "9b20c9a2-45ba-499f-9e6c-d9bcd90edc65"
+authors = ["David Métivier <david.metivier@inrae.fr>"]
+version = "0.1.0"
+
+[workspace]
+projects = ["test", "docs"]
+
+[deps]
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[compat]
+Random = "1"
+julia = "1.13"

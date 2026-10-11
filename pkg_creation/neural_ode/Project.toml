@@ -1,0 +1,15 @@
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+FrejusJuliaAD0 = "291bbb61-5548-43d0-9115-5a746418c0a9"
+FrejusJuliaNeuralNetworks0 = "9b20c9a2-45ba-499f-9e6c-d9bcd90edc65"
+FrejusJuliaODE0 = "bd46a455-3e9a-5dc5-990a-5a8525cf4051"
+FrejusJuliaOptimization0 = "ca26f490-bc68-4489-97cc-95a4c39097e5"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[sources]
+FrejusJuliaAD0 = {path = "../FrejusJuliaAD0"}
+FrejusJuliaNeuralNetworks0 = {path = "../FrejusJuliaNeuralNetworks0.jl"}
+FrejusJuliaODE0 = {path = "../FrejusJuliaODE0.jl"}
+FrejusJuliaOptimization0 = {path = "../FrejusJuliaOptimization0.jl"}

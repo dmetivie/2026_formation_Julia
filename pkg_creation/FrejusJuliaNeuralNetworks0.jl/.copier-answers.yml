@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier
+Authors: David Métivier <david.metivier@inrae.fr>
+JuliaMinVersion: '1.10'
+License: MIT
+LicenseCopyrightHolders: David Métivier
+PackageName: FrejusJuliaNeuralNetworks0
+PackageOwner: dmetivie
+PackageUUID: 9b20c9a2-45ba-499f-9e6c-d9bcd90edc65
+StrategyConfirmIncluded: false
+StrategyLevel: 1
+StrategyReviewExcluded: false
+_commit: py-v0.2.0
+_src_path: https://github.com/JuliaBesties/BestieTemplate.jl

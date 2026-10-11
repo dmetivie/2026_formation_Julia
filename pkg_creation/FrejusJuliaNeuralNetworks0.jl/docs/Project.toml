@@ -1,0 +1,10 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
+FrejusJuliaNeuralNetworks0 = "9b20c9a2-45ba-499f-9e6c-d9bcd90edc65"
+
+[compat]
+Documenter = "1"
+
+[sources]
+FrejusJuliaNeuralNetworks0 = {path = ".."}

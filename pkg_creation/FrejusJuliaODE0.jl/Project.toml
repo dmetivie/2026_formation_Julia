@@ -1,0 +1,10 @@
+name = "FrejusJuliaODE0"
+uuid = "bd46a455-3e9a-5dc5-990a-5a8525cf4051"
+authors = ["David Métivier <david.metivier@inrae.fr>"]
+version = "0.1.0"
+
+[workspace]
+projects = ["test", "docs"]
+
+[compat]
+julia = "1.13"

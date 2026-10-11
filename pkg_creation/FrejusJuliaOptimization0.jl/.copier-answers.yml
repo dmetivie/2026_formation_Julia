@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier
+Authors: David Métivier <david.metivier@inrae.fr>
+JuliaMinVersion: '1.10'
+License: MIT
+LicenseCopyrightHolders: David Métivier
+PackageName: FrejusJuliaOptimization0
+PackageOwner: dmetivie
+PackageUUID: ca26f490-bc68-4489-97cc-95a4c39097e5
+StrategyConfirmIncluded: false
+StrategyLevel: 0
+StrategyReviewExcluded: false
+_commit: py-v0.2.0
+_src_path: https://github.com/JuliaBesties/BestieTemplate.jl
