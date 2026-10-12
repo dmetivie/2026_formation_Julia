@@ -682,6 +682,9 @@ end
 ```
 """
 
+# ╔═╡ e0c14edc-3971-42e3-96c3-1086cde97b1e
+@btime rand(10^5);
+
 # ╔═╡ e500f340-b53c-46b2-a3fd-46d563c86df9
 md"""
 ### Types
@@ -722,6 +725,12 @@ Columns(
 
 # ╔═╡ 6782cd70-71dd-4504-a6b6-e4b0da3d9126
 Float16<:AbstractFloat
+
+# ╔═╡ 3b76ff49-1e12-47bb-93ac-18a1604849bb
+@btime sum(1:10^6)
+
+# ╔═╡ 38ece4db-e3b2-4314-a3df-5619ca7aeb80
+
 
 # ╔═╡ 772d1148-5181-425e-b2ca-365aa2b5c2a4
 md"""
@@ -1025,7 +1034,7 @@ md"""
 """
 
 # ╔═╡ b61894d9-bdbd-4f9b-b4ec-a6dd555a5aec
-dist = Normal(-1) #Exponential(5)
+dist = Exponential(5)
 
 # ╔═╡ 913904ea-4ff1-43d9-86a2-e851b2138dd6
 mean(dist)
@@ -1156,7 +1165,7 @@ date = range(; start=date_start, step=Day(1), length=length(t));
 lines(date, sin.(2Ω * t); color=main_color, linewidth=4)
 
 # ╔═╡ 957ee6e2-25db-41c9-a5a9-8b8efb39e6ff
-mydouble(x, y) = 1 * (x + y) # try 2 instead of 1
+mydouble(x, y) = 2 * (x + y) # try 2 instead of 1
 
 # ╔═╡ add00c30-7aa9-47f9-ac3b-4a1e97e23d09
 let
@@ -1196,7 +1205,7 @@ cartesian(r, θ, ϕ=0) = r*sin(θ)*cos(ϕ), r*sin(θ)*sin(ϕ), r*cos(θ)
 # ╔═╡ aa3e7729-3b2e-4824-92af-09d15894b521
 function myfillmat(x, n)
     v2 = fill(x, n)
-    v = sqrt.(v2)
+    v = (v2)
     M = v * v'
     return M
 end
@@ -1225,16 +1234,13 @@ Base.:/(a::Dual, b::Dual) = Dual(a.x / b.x, (b.x * a.δ - a.x * b.δ) / b.x^2)
 # ╔═╡ 37e6add7-46c6-4ece-9b14-f2bafb66a8a1
 φ₁.([1, 2, 3])
 
-# ╔═╡ e0c14edc-3971-42e3-96c3-1086cde97b1e
-@time rand(10^5);
-
 # ╔═╡ f3b572ef-b338-4b12-b1b8-08364fabf487
 @time myfillmat(2, 3)
 
 # ╔═╡ 2ea84a40-f68a-465e-bf76-e8edb2573429
 function mysqrt(x)
     y = x
-    for k in 1:3
+    for k in 1:5
         y = 1/2 * (y + x / y)
     end
     return y
@@ -4387,6 +4393,8 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═6782cd70-71dd-4504-a6b6-e4b0da3d9126
 # ╠═ac7408c8-c366-46ab-9515-93bc55dda4ac
 # ╠═ee8b8ad6-70d9-49d5-b2c0-1be93da8255c
+# ╠═3b76ff49-1e12-47bb-93ac-18a1604849bb
+# ╠═38ece4db-e3b2-4314-a3df-5619ca7aeb80
 # ╟─772d1148-5181-425e-b2ca-365aa2b5c2a4
 # ╟─e6429073-ffe9-4153-b90f-e55b27e2817d
 # ╟─42dd87b3-b9a2-4f57-bcac-3a191ab76380
