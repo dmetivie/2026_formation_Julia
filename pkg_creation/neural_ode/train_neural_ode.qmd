@@ -1,0 +1,190 @@
+---
+title: "Fitting a neural ODE with handmade packages"
+author: "David Métivier"
+date: last-modified
+format:
+  html:
+    toc: true
+engine: julia
+julia:
+  exeflags: ["--threads=auto"]
+---
+
+Neural ODE — putting the four packages together
+
+  du/dt = NN(u),   NN a small neural network whose weights we fit to data.
+
+Four packages, written independently this morning, meet here for the first
+time. None of them depends on any other.
+
+  FrejusJuliaAD0              derivatives (dual numbers)
+  FrejusJuliaODE0           time integration
+  FrejusJuliaNeuralNetworks0  the model
+  FrejusJuliaOptimization0          the optimiser
+
+```{julia}
+cd(@__DIR__)  # so that `using` finds the packages in this folder
+import Pkg; Pkg.activate(".")  # so that `using` finds the packages in this folder
+using FrejusJuliaAD0              # jacobian, gradient
+using FrejusJuliaODE0           # solve_ode, euler_step, rk4
+using FrejusJuliaNeuralNetworks0  # Dense, Chain, parameters, rebuild
+using FrejusJuliaOptimization0          # gauss_newton, gradient_descent
+
+using Printf
+using Random
+```
+
+# The data
+
+A damped rotation, du/dt = A u. This is the "true physics", which the network is not told about: all it will ever see is `nsave` points of one trajectory.
+
+```{julia}
+# ===========================================================================
+
+const A = [-0.1 2.0; -2.0 -0.1]     # slow decay + rotation => a spiral
+const u0 = [2.0, 0.0]
+const tspan = (0.0, 3.5)
+
+const nsave = 60                    # number of observations
+const substeps = 4                  # integration steps between two observations
+const nsteps = (nsave - 1) * substeps
+
+true_rhs(u, p, t) = p * u
+```
+
+RK4 for the data (order 4): we want the observations to be essentially exact.
+
+```{julia}
+const truth = rk4(true_rhs, u0, A, tspan, nsteps)
+const t_data = truth.t[1:substeps:end]
+const data = truth.u[1:substeps:end]
+
+@printf("Data: %d observations of a 2-D state on t in [%.1f, %.1f]\n", length(data), tspan[1], tspan[2])
+```
+
+# The model
+
+Replace the unknown right-hand side by a neural network:
+
+```{math}
+du/dt = NN(u)
+```
+
+8 hidden units is enough. `identity` on the output layer, because a velocity is not bounded in [-1, 1].
+
+```{julia}
+Random.seed!(42)
+const model = Chain(Dense(2 => 8, tanh), Dense(8 => 2, identity))
+const theta0 = parameters(model)
+
+@printf("Model: %s  (%d parameters)\n", repr(model), length(theta0))
+```
+
+# From "a neural network" to "a function of a vector"
+
+The optimiser knows nothing about layers; it minimises over R^42.
+`rebuild` is the translation, and these three functions are the whole bridge between the model and the solver.
+
+```{julia}
+"Trajectory predicted by the parameters `theta`, sampled at the observation times."
+function predict(theta, initial = u0)
+    net = rebuild(model, theta)                              # vector  -> network
+    rhs(u, p, t) = net(u)                                    # network -> ODE
+    sol = solve_ode(rhs, initial, theta, tspan, nsteps; step = euler_step)
+   return sol.u[1:substeps:end]
+end
+```
+
+All prediction errors, stacked into one long vector.
+
+```{julia}
+residuals(theta) = reduce(vcat, predict(theta) .- data)
+```
+
+Sum of squares — the quantity we actually minimise.
+
+```{julia}
+loss(theta) = sum(abs2, residuals(theta))
+
+@printf("Loss before training: %.4e\n", loss(theta0))
+```
+
+# The derivatives
+
+THIS IS THE POINT OF THE WHOLE EXERCISE.
+
+`jacobian` pushes dual numbers into `residuals`. Those duals travel through `rebuild` and the forward pass (neural network package), then through every Euler step (ODE package), and come back out carrying the derivatives.
+
+Neither of those two packages has ever heard of a dual number. They work because they were written generically: no `Float64`, no array allocated with an assumed element type. Multiple dispatch does the rest.
+
+```{julia}
+jac(theta) = jacobian(residuals, theta)
+```
+
+Sanity check: compare one column against a finite difference.
+
+```{julia}
+let h = 1.0e-6, k = 5
+    theta_shift = copy(theta0)
+    theta_shift[k] += h
+    finite_difference = (residuals(theta_shift) .- residuals(theta0)) ./ h
+    @printf("AD vs finite differences on column %d: max difference %.2e\n",
+        k, maximum(abs, jac(theta0)[:, k] .- finite_difference))
+end
+```
+
+# Training
+## Gauss-Newton
+Fitting a model to data by least squares is exactly what Gauss-Newton is for: it only ever needs the Jacobian of the residuals, never a Hessian.
+
+```{julia}
+elapsed = @elapsed result = gauss_newton(residuals, jac, theta0; maxiter = 100)
+
+@printf("\nGauss-Newton: loss %.4e -> %.4e in %d iterations (%.2f s)\n",
+    result.history[1], result.history[end], result.iterations, elapsed)
+
+println("\n  iteration      loss")
+for k in (1, 3, 6, 11, 21, 51, length(result.history))
+    @printf("  %9d   %.4e\n", k - 1, result.history[k])
+end
+println("  (the loss is flat over the first iterations: Levenberg-Marquardt is")
+println("   rejecting steps and raising lambda until the linear model is trusted)")
+```
+
+## The baseline: gradient descent
+
+Same problem, same derivatives, with a simple gradient descent. It is much slower than Gauss-Newton, because it does not use the Jacobian to linearise the problem. It is included here for comparison.
+
+```{julia}
+grad(theta) = gradient(loss, theta)
+
+elapsed_gd = @elapsed descent = gradient_descent(loss, grad, theta0; η = 1.0e-3, maxiter = 500)
+
+@printf("\nGradient descent: loss %.4e -> %.4e in %d iterations (%.2f s)\n",
+    descent.history[1], descent.history[end], descent.iterations, elapsed_gd)
+@printf("Gauss-Newton reached %.4e, i.e. about %.0e times lower.\n",
+    result.history[end], descent.history[end] / result.history[end])
+```
+
+# How good is the fit?
+
+```{julia}
+prediction = predict(result.x)
+prediction_gd = predict(descent.x)
+
+println("\n      t        data u1     model u1       data u2     model u2")
+for k in 1:6:length(data)
+    @printf("  %5.2f   %10.5f  %10.5f    %10.5f  %10.5f\n",
+        t_data[k], data[k][1], prediction[k][1], data[k][2], prediction[k][2])
+end
+
+@printf("\nLargest error along the trajectory: %.2e\n",
+    maximum(maximum(abs, p .- d) for (p, d) in zip(prediction, data)))
+
+include("plot_neural_ode.jl")  # make the figure
+```
+
+---
+
+*This page was generated using [Literate.jl](https://github.com/fredrikekre/Literate.jl).*
+

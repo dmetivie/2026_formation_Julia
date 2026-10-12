@@ -78,7 +78,7 @@ slide_mode_button()
 
 # ╔═╡ 6149c7a3-140e-4204-a6f1-8f09a42d9242
 slide_mode_title(
-    title="Présentation générale Julia et de quelques écosystèmes",
+    title="Présentation générale Julia et de quelques écosystèmes\n & Création de packages",
     author=html"""
     <center>David Métivier</center>
     <p>
@@ -131,7 +131,7 @@ md"""
 	1. **Motivation** for Julia
 	2. **Basics**
 	3. **Examples**: reference ecosystems and composability
-	4. **Writing a package** -- writing four of them
+	4. **Writing a package** -- writing & assembling four of them to train ``\frac{\mathrm{d}u}{\mathrm{d}t} = \mathrm{NeuralNetwork}(u).``
 
     **Goal**: Give you a feeling that this is a **great modern tool for complex scientific problems** and teaching, and that **the language favors collaborative work**.
 $(pause())
@@ -140,10 +140,6 @@ $(pause())
     - **Performance**
 	- **Parallelism**: threads, MPI, GPU -- one lecture each
     - **Interface** with other languages
-"""
-
-# ╔═╡ 6fd06cfa-37c3-4e16-b3f5-15a8688fe51a
-md"""
 $(pause())
 !!! warning "Disclaimer"
 	I will present many things: **a lot already exists in other languages**, sometimes as add-ons or wrapped C/C++ libraries.
@@ -876,6 +872,27 @@ md"""
 [^from]: Tim Holy [this video](https://youtu.be/jFhL8EVrz7s?t=286), that [notebook](https://github.com/timholy/AdvancedScientificComputing/blob/main/lectures/intro/intro-julia.ipynb) and [this paper](https://arxiv.org/abs/2109.09973)
 """
 
+# ╔═╡ b5f1432a-6c49-4325-90a3-a1acb91f9862
+md"""
+## Composability
+"""
+
+# ╔═╡ 787b287f-1738-40e0-852d-a48bf4e5e14e
+Columns(
+    Twitter(1589676578560102400),
+    md"""
+    !!! tip "In Julia"
+    	One language + type sharing + multiple dispatch
+
+    	⇒ Amazing, unexpected combination and code reuse
+
+    	⇒ Improving a package can benefit the **whole** ecosystem
+
+    !!! warning "What is NOT code reuse?"
+        Recoding basic stuff because of incompatible frameworks `tensorflow.random.uniform`, `numpy.random.rand`, `torch.rand`, `jax.random.uniform`
+    """)
+
+
 # ╔═╡ 1353c885-8bfb-4065-bce7-c31bb0184815
 md"""
 ## Multiple dispatch showcase
@@ -967,30 +984,29 @@ Columns(
     widths=[40, 60], gap=2
 )
 
-# ╔═╡ b5f1432a-6c49-4325-90a3-a1acb91f9862
-md"""
-## Composability
-"""
-
-# ╔═╡ 787b287f-1738-40e0-852d-a48bf4e5e14e
-Columns(
-    Twitter(1589676578560102400),
-    md"""
-    !!! tip "In Julia"
-    	One language + type sharing + multiple dispatch
-
-    	⇒ Amazing, unexpected combination and code reuse
-
-    	⇒ Improving a package can benefit the **whole** ecosystem
-
-    !!! warning "What is NOT code reuse?"
-        Recoding basic stuff because of incompatible frameworks `tensorflow.random.uniform`, `numpy.random.rand`, `torch.rand`, `jax.random.uniform`
-    """)
-
-
 # ╔═╡ 31ce0ecf-69ea-41c6-970f-7117d8399ad2
 md"""
 # Ecosystems
+"""
+
+# ╔═╡ 1b04af0e-ae4f-470c-bbe3-2ed9e571ded1
+md"""
+## An ecosystem of small things
+"""
+
+# ╔═╡ 60f2cab8-8c93-4f9a-938a-debcddde2496
+md"""
+!!! note "Two populations"
+	- A few **big reference ecosystems/organizations**: SciML, JuliaStats, JuliaData, JuliaGraphs, JuliaGPU, Makie, JuMP...
+	- Hundreds of **tiny packages** doing exactly one thing, e.g. [ToeplitzMatrices.jl](https://github.com/JuliaLinearAlgebra/ToeplitzMatrices.jl)
+
+!!! tip "The philosophy"
+	One package = **one mathematical object**, or one algorithm.
+
+	Small ⇒ easy to test, to document, to review, to trust. And it composes with the rest precisely *because* it only talks about its own object.
+
+!!! danger "The consequence"
+	Your small package can be useful to someone else.
 """
 
 # ╔═╡ edef726b-0eb6-46b9-935e-c151977d15a0
@@ -1009,16 +1025,22 @@ md"""
 """
 
 # ╔═╡ b61894d9-bdbd-4f9b-b4ec-a6dd555a5aec
-dist = Normal()
+dist = Normal(-1) #Exponential(5)
+
+# ╔═╡ 913904ea-4ff1-43d9-86a2-e851b2138dd6
+mean(dist)
 
 # ╔═╡ 3819d633-4531-4053-b063-501c7060d7a5
 data = rand(dist, 500)
+
+# ╔═╡ 8e93923a-fb4f-42d4-a735-ecd9bf40c307
+pdf(dist, 5.2)
 
 # ╔═╡ dbc44103-8163-4d02-802a-765dba4b905f
 hist(data)
 
 # ╔═╡ 4449508f-df28-4d2d-aa14-46dd0902de46
-rand(dist, 1)
+rand(dist, 1, 5)
 
 # ╔═╡ 48ca2c1f-cc8e-4268-9f25-2efc655ddfac
 md"""
@@ -1264,26 +1286,6 @@ Columns(
     """,
     widths=[48, 52], gap=1
 )
-
-# ╔═╡ 1b04af0e-ae4f-470c-bbe3-2ed9e571ded1
-md"""
-## An ecosystem of small things
-"""
-
-# ╔═╡ 60f2cab8-8c93-4f9a-938a-debcddde2496
-md"""
-!!! note "Two populations"
-	- A few **big reference ecosystems/organizations**: SciML, JuliaStats, JuliaData, JuliaGraphs, JuliaGPU, Makie, JuMP...
-	- Hundreds of **tiny packages** doing exactly one thing, e.g. [ToeplitzMatrices.jl](https://github.com/JuliaLinearAlgebra/ToeplitzMatrices.jl)
-
-!!! tip "The philosophy"
-	One package = **one mathematical object**, or one algorithm.
-
-	Small ⇒ easy to test, to document, to review, to trust. And it composes with the rest precisely *because* it only talks about its own object.
-
-!!! danger "The consequence"
-	Your small package can be useful to someone else.
-"""
 
 # ╔═╡ 83aa29be-fd0c-45f2-942f-e3ae7db415be
 md"""
@@ -1666,7 +1668,7 @@ md"""
 	```math
 	\frac{\mathrm{d}u}{\mathrm{d}t} = \mathrm{NeuralNetwork}(u)
 	```
-	on data. Three different templates on purpose, so you see what each generator gives you.
+	on data.
 """
 
 # ╔═╡ f9fd3f7a-ba90-4899-ba7d-102cfabf1b0a
@@ -1677,8 +1679,7 @@ md"""
 # ╔═╡ a10060ce-d713-4028-b966-664df23da4af
 md"""
 !!! danger "1. No package depends on any other"
-	No `FrejusJulia...` in anybody's `Project.toml`. Check it.
-	This is what lets the four of you work **in parallel**, and what makes the last half-hour interesting rather than a merge conflict.
+	This is what lets the four of you work **in parallel**.
 
 !!! danger "2. Write generic code"
 	No `::Float64` in a signature, no `zeros(3)` where the element type should come from the input. Ask for the least you need.
@@ -4293,7 +4294,6 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─c0684073-01b1-486e-baf5-71cb4b3f1cad
 # ╟─550cf92b-05b3-45e3-bf83-ab1175f1b002
 # ╟─80541381-32d8-4ae0-8dc5-569b315fdb46
-# ╟─6fd06cfa-37c3-4e16-b3f5-15a8688fe51a
 # ╟─dd796fa6-fa31-4559-9855-f6ade6a6c510
 # ╟─c90ed7b5-bc3a-4844-9a20-e0797d1a6ca5
 # ╟─f767e601-08da-436a-a4ea-fc92e18c1bec
@@ -4416,6 +4416,8 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─a3771e8a-1b07-4d31-b4ad-19e3ede8ffaa
 # ╟─6097217e-c193-4877-af31-6430636988bf
 # ╟─7e3a8d7f-2c99-4d56-b78e-ba68cf400fbe
+# ╟─b5f1432a-6c49-4325-90a3-a1acb91f9862
+# ╟─787b287f-1738-40e0-852d-a48bf4e5e14e
 # ╟─1353c885-8bfb-4065-bce7-c31bb0184815
 # ╟─1ab4495a-0743-451e-9429-9c3487d1f772
 # ╠═bbafd906-f6fe-4fa0-8adc-9daa8dfb8f18
@@ -4440,13 +4442,15 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─65c2d1ed-6fd1-47f1-b51b-269c7941ae2f
 # ╟─f8a0b5ec-1623-4f25-b6dc-c859dab34037
 # ╟─782b4b45-8f00-4805-b70f-6a527d5dba60
-# ╟─b5f1432a-6c49-4325-90a3-a1acb91f9862
-# ╟─787b287f-1738-40e0-852d-a48bf4e5e14e
 # ╟─31ce0ecf-69ea-41c6-970f-7117d8399ad2
+# ╟─1b04af0e-ae4f-470c-bbe3-2ed9e571ded1
+# ╟─60f2cab8-8c93-4f9a-938a-debcddde2496
 # ╟─edef726b-0eb6-46b9-935e-c151977d15a0
 # ╟─fac73484-defd-442c-89f6-9eff9f5749da
 # ╠═b61894d9-bdbd-4f9b-b4ec-a6dd555a5aec
+# ╠═913904ea-4ff1-43d9-86a2-e851b2138dd6
 # ╠═3819d633-4531-4053-b063-501c7060d7a5
+# ╠═8e93923a-fb4f-42d4-a735-ecd9bf40c307
 # ╠═dbc44103-8163-4d02-802a-765dba4b905f
 # ╠═36aff0f4-5a82-4987-ba75-c2a66b3286e8
 # ╠═4449508f-df28-4d2d-aa14-46dd0902de46
@@ -4471,8 +4475,6 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═8e362a49-fdfe-499d-abf1-40005f25aec8
 # ╟─44aab99a-1443-47d7-ab9c-84499fdb2db8
 # ╟─f7cdac03-ac02-47e0-b669-f5ae860df57d
-# ╟─1b04af0e-ae4f-470c-bbe3-2ed9e571ded1
-# ╟─60f2cab8-8c93-4f9a-938a-debcddde2496
 # ╟─83aa29be-fd0c-45f2-942f-e3ae7db415be
 # ╟─e8b03545-6a95-447f-885b-f442b2c08515
 # ╟─0662f0dc-8f65-4b65-8ca4-fe4978fb2da6

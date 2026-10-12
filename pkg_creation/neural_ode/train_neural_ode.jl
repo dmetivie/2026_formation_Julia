@@ -1,4 +1,15 @@
-# =============================================================================
+# ---
+# title: "Fitting a neural ODE with handmade packages"
+# author: "David Métivier"
+# date: last-modified
+# format:
+#   html:
+#     toc: true
+# engine: julia
+# julia:
+#   exeflags: ["--threads=auto"]
+# ---
+
 # Neural ODE — putting the four packages together
 #
 #   du/dt = NN(u),   NN a small neural network whose weights we fit to data.
@@ -10,10 +21,7 @@
 #   FrejusJuliaODE0           time integration
 #   FrejusJuliaNeuralNetworks0  the model
 #   FrejusJuliaOptimization0          the optimiser
-#
-# Run with:   julia --project=. train_neural_ode.jl
-# or open in VS Code and send the `##` blocks to the REPL one at a time.
-# =============================================================================
+
 cd(@__DIR__)  # so that `using` finds the packages in this folder
 import Pkg; Pkg.activate(".")  # so that `using` finds the packages in this folder
 using FrejusJuliaAD0              # jacobian, gradient
@@ -26,14 +34,14 @@ using Random
 
 # # The data
 #
-# A damped rotation, du/dt = A u. This is the "true physics", which the network is not told about: all it will ever see is 30 points of one trajectory.
+# A damped rotation, du/dt = A u. This is the "true physics", which the network is not told about: all it will ever see is `nsave` points of one trajectory.
 ## ===========================================================================
 
 const A = [-0.1 2.0; -2.0 -0.1]     # slow decay + rotation => a spiral
 const u0 = [2.0, 0.0]
-const tspan = (0.0, 1.5)
+const tspan = (0.0, 3.5)
 
-const nsave = 30                    # number of observations
+const nsave = 60                    # number of observations
 const substeps = 4                  # integration steps between two observations
 const nsteps = (nsave - 1) * substeps
 
@@ -86,12 +94,11 @@ loss(theta) = sum(abs2, residuals(theta))
 
 # # The derivatives
 #
-# ---------------------------------------------------------------------------
 # THIS IS THE POINT OF THE WHOLE EXERCISE.
 #
 # `jacobian` pushes dual numbers into `residuals`. Those duals travel through `rebuild` and the forward pass (neural network package), then through every Euler step (ODE package), and come back out carrying the derivatives.
 # 
-# Neither of those two packages has ever heard of a dual number. They work because they were written generically: no `::Float64`, no array allocated with an assumed element type. Multiple dispatch does the rest.
+# Neither of those two packages has ever heard of a dual number. They work because they were written generically: no `Float64`, no array allocated with an assumed element type. Multiple dispatch does the rest.
 
 jac(theta) = jacobian(residuals, theta) 
 
@@ -134,9 +141,7 @@ elapsed_gd = @elapsed descent = gradient_descent(loss, grad, theta0; η = 1.0e-3
 @printf("Gauss-Newton reached %.4e, i.e. about %.0e times lower.\n",
     result.history[end], descent.history[end] / result.history[end])
 
-## ===========================================================================
-## 7. How good is the fit?
-## ===========================================================================
+# # How good is the fit?
 
 prediction = predict(result.x)
 prediction_gd = predict(descent.x)
@@ -149,3 +154,5 @@ end
 
 @printf("\nLargest error along the trajectory: %.2e\n",
     maximum(maximum(abs, p .- d) for (p, d) in zip(prediction, data)))
+
+include("plot_neural_ode.jl")  # make the figure
